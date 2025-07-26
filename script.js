@@ -5,7 +5,6 @@ document.addEventListener('DOMContentLoaded', function() {
     let audioPlaying = false;
     const bgMusic = document.getElementById('bgMusic');
     const clickSound = document.getElementById('clickSound');
-    const prevButton = document.getElementById('prevPage');
     const nextButton = document.getElementById('nextPage');
     const startButton = document.getElementById('startButton');
     
@@ -42,9 +41,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Functions to handle page navigation
+    // Functions to handle page navigation (HANYA MAJU, TIDAK BISA MUNDUR)
     function goToPage(pageNumber) {
-        if (pageNumber < 1 || pageNumber > totalPages) return;
+        if (pageNumber < 1 || pageNumber > totalPages || pageNumber <= currentPage) return;
         
         console.log("Navigating to page:", pageNumber);
         playClickSound();
@@ -66,10 +65,7 @@ document.addEventListener('DOMContentLoaded', function() {
         updateNavButtons();
         
         // Handle special cases when entering specific pages
-        if (pageNumber === 1) {
-            // Reset page 1 if needed
-            resetConfetti();
-        } else if (pageNumber === 4) {
+        if (pageNumber === 4) {
             // Reset treasure chest
             const chest = document.querySelector('.treasure-chest');
             chest.classList.remove('chest-open');
@@ -82,18 +78,20 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function updateNavButtons() {
-        prevButton.style.visibility = currentPage === 1 ? 'hidden' : 'visible';
+        // Sembunyikan tombol prev karena tidak bisa mundur
+        const prevButton = document.getElementById('prevPage');
+        if (prevButton) {
+            prevButton.style.display = 'none';
+        }
+        
+        // Update tombol next
         nextButton.style.visibility = currentPage === totalPages ? 'hidden' : 'visible';
     }
     
     // Initial setup
     updateNavButtons();
     
-    // Navigation event listeners
-    prevButton.addEventListener('click', function() {
-        goToPage(currentPage - 1);
-    });
-    
+    // Navigation event listeners (HANYA NEXT)
     nextButton.addEventListener('click', function() {
         goToPage(currentPage + 1);
     });
@@ -120,11 +118,9 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('load', adjustPageHeight);
     window.addEventListener('resize', adjustPageHeight);
     
-    // Keyboard navigation
+    // Keyboard navigation (HANYA MAJU)
     document.addEventListener('keydown', function(e) {
-        if (e.code === 'ArrowLeft') {
-            goToPage(currentPage - 1);
-        } else if (e.code === 'ArrowRight') {
+        if (e.code === 'ArrowRight') {
             goToPage(currentPage + 1);
         } else if (e.code === 'Space') {
             // Trigger the main action button on current page
@@ -137,8 +133,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Variabel untuk touch events
-    // Variabel untuk touch events
+    // Touch swipe events (HANYA SWIPE KIRI UNTUK MAJU)
     let touchStartX = 0;
     let touchEndX = 0;
     let touchStartY = 0;
@@ -159,14 +154,10 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
+        // Hanya swipe left untuk maju
         if (touchEndX < touchStartX - swipeThreshold) {
             // Swipe left, go to next page
             goToPage(currentPage + 1);
-        }
-        
-        if (touchEndX > touchStartX + swipeThreshold) {
-            // Swipe right, go to previous page
-            goToPage(currentPage - 1);
         }
     }
 
@@ -602,7 +593,7 @@ document.addEventListener('DOMContentLoaded', function() {
         confettiContainer.innerHTML = '';
     }
     
-    // Advice Cards Logic (Page 6)
+    // Advice Cards Logic (Page 6) - TANPA AUTO SLIDE
     let currentCardIndex = 1;
     const totalCards = 5;
     
@@ -660,48 +651,9 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
         
-        // Auto-slide functionality
-        let autoSlideInterval;
-        
-        function startAutoSlide() {
-            autoSlideInterval = setInterval(() => {
-                const nextIndex = currentCardIndex < totalCards ? currentCardIndex + 1 : 1;
-                showCard(nextIndex);
-            }, 4000); // Change card every 4 seconds
-        }
-        
-        function stopAutoSlide() {
-            if (autoSlideInterval) {
-                clearInterval(autoSlideInterval);
-            }
-        }
-        
-        // Start auto-slide when page 6 is active
-        const page6 = document.getElementById('page6');
-        const observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-                if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                    if (page6.classList.contains('active')) {
-                        startAutoSlide();
-                    } else {
-                        stopAutoSlide();
-                    }
-                }
-            });
-        });
-        
-        observer.observe(page6, { attributes: true });
-        
-        // Stop auto-slide on user interaction
+        // Touch swipe support for cards (TANPA AUTO SLIDE)
         const cardWrapper = document.querySelector('.advice-cards-wrapper');
         if (cardWrapper) {
-            cardWrapper.addEventListener('mouseenter', stopAutoSlide);
-            cardWrapper.addEventListener('mouseleave', startAutoSlide);
-            cardWrapper.addEventListener('touchstart', stopAutoSlide);
-            
-            // Touch swipe support for cards
-           // Touch swipe support for cards
-            // Touch swipe support for cards
             let cardTouchStartX = 0;
             let cardTouchEndX = 0;
             let isCardScrolling = false;
@@ -709,7 +661,6 @@ document.addEventListener('DOMContentLoaded', function() {
             cardWrapper.addEventListener('touchstart', function(e) {
                 cardTouchStartX = e.changedTouches[0].screenX;
                 isCardScrolling = false;
-                stopAutoSlide();
             });
             
             cardWrapper.addEventListener('touchmove', function(e) {
@@ -725,15 +676,11 @@ document.addEventListener('DOMContentLoaded', function() {
             
             cardWrapper.addEventListener('touchend', function(e) {
                 if (!isCardScrolling) {
-                    // Restart auto-slide after a delay if no card swipe detected
-                    setTimeout(startAutoSlide, 2000);
                     return;
                 }
                 
                 cardTouchEndX = e.changedTouches[0].screenX;
                 handleCardSwipe();
-                // Restart auto-slide after a delay
-                setTimeout(startAutoSlide, 2000);
             });
             
             function handleCardSwipe() {
@@ -875,24 +822,13 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
         
-        // Back to start button
+        // Back to start button - TIDAK BISA MUNDUR, HANYA RESTART
         if (backToStartBtn) {
             backToStartBtn.addEventListener('click', function() {
                 playClickSound();
-                goToPage(1);
                 
-                // Reset form
-                feedbackForm.reset();
-                feedbackForm.classList.remove('hidden');
-                feedbackSuccess.classList.add('hidden');
-                
-                // Reset stars
-                stars.forEach(star => star.classList.remove('active'));
-                // Set default 5-star rating
-                for (let i = 0; i < 5; i++) {
-                    stars[i].classList.add('active');
-                }
-                ratingInput.value = '5';
+                // Reload halaman untuk restart dari awal
+                window.location.reload();
             });
         }
     }
@@ -1034,23 +970,13 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         
-        // Back to start button
+        // Back to start button - RESTART GAME
         if (backToStartButton) {
             backToStartButton.addEventListener('click', function() {
                 playClickSound();
-                goToPage(1);
                 
-                // Reset final question state
-                document.querySelector('.answer-buttons').style.display = 'flex';
-                finalAnswer.classList.add('hidden');
-                
-                // Reset no button position
-                if (noButton) {
-                    noButton.style.right = '20px';
-                    noButton.style.bottom = '20px';
-                    noButton.style.left = 'auto';
-                    noButton.style.top = 'auto';
-                }
+                // Reload halaman untuk restart dari awal
+                window.location.reload();
             });
         }
     }
