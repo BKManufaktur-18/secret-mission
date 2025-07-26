@@ -683,23 +683,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 handleCardSwipe();
             });
             
-            function handleCardSwipe() {
-                const swipeThreshold = 50;
+            // function handleCardSwipe() {
+            //     const swipeThreshold = 50;
                 
-                if (cardTouchEndX < cardTouchStartX - swipeThreshold) {
-                    // Swipe left, go to next card
-                    if (currentCardIndex < totalCards) {
-                        showCard(currentCardIndex + 1);
-                    }
-                }
+            //     if (cardTouchEndX < cardTouchStartX - swipeThreshold) {
+            //         // Swipe left, go to next card
+            //         if (currentCardIndex < totalCards) {
+            //             showCard(currentCardIndex + 1);
+            //         }
+            //     }
                 
-                if (cardTouchEndX > cardTouchStartX + swipeThreshold) {
-                    // Swipe right, go to previous card
-                    if (currentCardIndex > 1) {
-                        showCard(currentCardIndex - 1);
-                    }
-                }
-            }
+            //     if (cardTouchEndX > cardTouchStartX + swipeThreshold) {
+            //         // Swipe right, go to previous card
+            //         if (currentCardIndex > 1) {
+            //             showCard(currentCardIndex - 1);
+            //         }
+            //     }
+            // }
         }
     }
     
