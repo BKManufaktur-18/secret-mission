@@ -3,6 +3,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const totalPages = document.querySelectorAll('.page').length;
     let currentPage = 1;
     let audioPlaying = false;
+    let startY = 0;
+    let isAtTop = true;
     const bgMusic = document.getElementById('bgMusic');
     const clickSound = document.getElementById('clickSound');
     const nextButton = document.getElementById('nextPage');
@@ -27,6 +29,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         audioPlaying = !audioPlaying;
     });
+
+    function checkScrollPosition() {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        isAtTop = scrollTop <= 0;
+    }
+
+    window.addEventListener('scroll', checkScrollPosition);
+    checkScrollPosition(); // Initial check
 
     // Deteksi ukuran layar untuk penyesuaian game
     function isMobileDevice() {
@@ -154,9 +164,9 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        // Hanya swipe left untuk maju
+        // Hanya swipe left untuk maju HALAMAN (bukan card)
         if (touchEndX < touchStartX - swipeThreshold) {
-            // Swipe left, go to next page
+            // Swipe left, go to next PAGE (bukan card)
             goToPage(currentPage + 1);
         }
     }
@@ -167,10 +177,15 @@ document.addEventListener('DOMContentLoaded', function() {
         const scrollableElements = ['TEXTAREA', 'INPUT', 'SELECT'];
         const interactiveClasses = ['memory-card', 'advice-card', 'card-nav-btn', 'star', 'pixel-btn'];
         
-        // Skip swipe detection jika menyentuh elemen interaktif
+        // KHUSUS: Skip swipe detection untuk SEMUA elemen di advice cards area
+        const adviceCardsArea = target.closest('.advice-cards-wrapper') || 
+                               target.closest('.advice-cards-container') ||
+                               target.closest('.advice-card') ||
+                               target.closest('.card-navigation');
+        
         if (scrollableElements.includes(target.tagName) || 
             interactiveClasses.some(cls => target.classList.contains(cls)) ||
-            target.closest('.advice-cards-wrapper') ||
+            adviceCardsArea || // TAMBAHAN: Disable swipe di area advice cards
             target.closest('.feedback-form') ||
             target.closest('.memory-game-container')) {
             return;
@@ -620,7 +635,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
         
-        // Previous card button
+        // Previous card button - HANYA TOMBOL, TIDAK ADA AUTO
         if (prevCardBtn) {
             prevCardBtn.addEventListener('click', function() {
                 if (currentCardIndex > 1) {
@@ -630,7 +645,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
         
-        // Next card button
+        // Next card button - HANYA TOMBOL, TIDAK ADA AUTO
         if (nextCardBtn) {
             nextCardBtn.addEventListener('click', function() {
                 if (currentCardIndex < totalCards) {
@@ -640,7 +655,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
         
-        // Indicator clicks
+        // Indicator clicks - HANYA KLIK MANUAL
         indicators.forEach(indicator => {
             indicator.addEventListener('click', function() {
                 const cardNumber = parseInt(this.dataset.card);
@@ -651,75 +666,58 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
         
-        // Touch swipe support for cards (TANPA AUTO SLIDE)
-        const cardWrapper = document.querySelector('.advice-cards-wrapper');
-        if (cardWrapper) {
-            let cardTouchStartX = 0;
-            let cardTouchEndX = 0;
-            let isCardScrolling = false;
-            
-            cardWrapper.addEventListener('touchstart', function(e) {
-                cardTouchStartX = e.changedTouches[0].screenX;
-                isCardScrolling = false;
-            });
-            
-            cardWrapper.addEventListener('touchmove', function(e) {
-                const currentX = e.changedTouches[0].screenX;
-                const distance = Math.abs(currentX - cardTouchStartX);
-                
-                // Jika gerakan horizontal cukup besar, anggap sebagai card swipe
-                if (distance > 10) {
-                    isCardScrolling = true;
-                    e.preventDefault(); // Prevent scrolling when swiping cards
-                }
-            });
-            
-            cardWrapper.addEventListener('touchend', function(e) {
-                if (!isCardScrolling) {
-                    return;
-                }
-                
-                cardTouchEndX = e.changedTouches[0].screenX;
-                handleCardSwipe();
-            });
-            
-            // function handleCardSwipe() {
-            //     const swipeThreshold = 50;
-                
-            //     if (cardTouchEndX < cardTouchStartX - swipeThreshold) {
-            //         // Swipe left, go to next card
-            //         if (currentCardIndex < totalCards) {
-            //             showCard(currentCardIndex + 1);
-            //         }
-            //     }
-                
-            //     if (cardTouchEndX > cardTouchStartX + swipeThreshold) {
-            //         // Swipe right, go to previous card
-            //         if (currentCardIndex > 1) {
-            //             showCard(currentCardIndex - 1);
-            //         }
-            //     }
-            // }
-        }
+        // HAPUS SEMUA TOUCH SWIPE SUPPORT UNTUK CARDS
+        // Tidak ada lagi auto slide, touch swipe, atau timer
+        // Cards hanya bisa dipindah dengan tombol prev/next atau indicator
+        
+        console.log("Advice cards initialized - MANUAL NAVIGATION ONLY");
     }
     
     function showCard(cardIndex) {
-        // Remove active class from current card and indicator
-        document.querySelector('.advice-card.active').classList.remove('active');
-        document.querySelector('.indicator.active').classList.remove('active');
+        // Validasi input
+        if (cardIndex < 1 || cardIndex > totalCards) {
+            return;
+        }
         
-        // Add active class to new card and indicator
-        document.querySelector(`[data-card="${cardIndex}"]`).classList.add('active');
-        document.querySelector(`.indicator[data-card="${cardIndex}"]`).classList.add('active');
+        // Remove active class dari current card dan indicator
+        const currentCard = document.querySelector('.advice-card.active');
+        const currentIndicator = document.querySelector('.indicator.active');
         
+        if (currentCard) {
+            currentCard.classList.remove('active');
+        }
+        if (currentIndicator) {
+            currentIndicator.classList.remove('active');
+        }
+        
+        // Add active class ke new card dan indicator
+        const newCard = document.querySelector(`[data-card="${cardIndex}"]`);
+        const newIndicator = document.querySelector(`.indicator[data-card="${cardIndex}"]`);
+        
+        if (newCard) {
+            newCard.classList.add('active');
+        }
+        if (newIndicator) {
+            newIndicator.classList.add('active');
+        }
+        
+        // Update current index
         currentCardIndex = cardIndex;
         
-        // Update navigation buttons
+        // Update navigation buttons state
         const prevBtn = document.getElementById('prevCard');
         const nextBtn = document.getElementById('nextCard');
         
-        if (prevBtn) prevBtn.disabled = (cardIndex === 1);
-        if (nextBtn) nextBtn.disabled = (cardIndex === totalCards);
+        if (prevBtn) {
+            prevBtn.disabled = (cardIndex === 1);
+            prevBtn.style.opacity = (cardIndex === 1) ? '0.5' : '1';
+        }
+        if (nextBtn) {
+            nextBtn.disabled = (cardIndex === totalCards);
+            nextBtn.style.opacity = (cardIndex === totalCards) ? '0.5' : '1';
+        }
+        
+        console.log(`Showing card ${cardIndex} - MANUAL ONLY`);
     }
     
     // Feedback Form Logic (Page 7)
