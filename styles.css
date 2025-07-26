@@ -30,14 +30,20 @@ body {
     position: relative;
 }
 
-/* Page Navigation */
+/* Page Navigation - HIDE PREVIOUS BUTTON */
 .page-navigation {
     display: flex;
-    justify-content: space-between;
+    justify-content: center; /* Center the navigation */
     align-items: center;
     padding: 10px;
     background-color: #000033;
     border-bottom: 4px solid #33bbff;
+    position: relative;
+}
+
+/* Hide previous button completely */
+#prevPage {
+    display: none !important;
 }
 
 .nav-arrow {
@@ -58,6 +64,15 @@ body {
 .page-indicator {
     font-size: 14px;
     color: #ffffff;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* Next button positioned to the right */
+#nextPage {
+    position: absolute;
+    right: 10px;
 }
 
 /* Audio Control */
@@ -773,10 +788,10 @@ h2 {
     display: none !important;
 }
 
-/* Game Controls */
+/* Game Controls - UPDATE UNTUK HANYA NEXT */
 .game-controls {
     display: flex;
-    justify-content: space-around;
+    justify-content: center; /* Center the controls */
     padding: 10px;
     background-color: #000033;
     border-top: 4px solid #33bbff;
@@ -786,6 +801,7 @@ h2 {
 .control-item {
     display: flex;
     align-items: center;
+    margin: 0 10px;
 }
 
 .key {
